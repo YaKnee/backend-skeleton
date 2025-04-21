@@ -9,4 +9,4 @@ const itemSchema = new mongoose.Schema({
     priority: { type: String, required: true, enum: ["None", "Low", "Medium", "High"], default: "Low" }
 })
 
-export const Item = mongoose.model("Task", itemSchema, "tasks");
+export const Item = mongoose.model("Item", itemSchema, "items");
