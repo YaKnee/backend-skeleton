@@ -1,4 +1,4 @@
-# Task Manager Backend
+# Skeleton Backend
 
 This is a skeleton backend API for whatever you need. The API is built with Express and MongoDB. The application supports CRUD operations and includes validation and authentication features to ensure data integrity and security.
 
@@ -6,9 +6,9 @@ This is a skeleton backend API for whatever you need. The API is built with Expr
 _Requires Node.js and your own MongoDB server and credentials. Instructions can be found here on how to setup your own: [Getting Started with MongoDB Atlas](https://www.youtube.com/watch?v=bBA9rUdqmgY)._
 
 Go to the directory where you want to store this repository, then:
-1. Define schema for items in _itemModel.js_
-2. Set validation criteria for items in _validateItem.js_
-3. Change _getAllItems_ functions in _itemController.js_ to match item scehma.
+1. Define schema for items in [itemModel.js](models/itemModel.js).
+2. Set validation criteria for items in [validateItem.js](middlewares/validateItem.js)
+3. Change [getAllItems](https://github.com/YaKnee/backend-skeleton/blob/main/controllers/itemController.js#L6) function in [itemController.js](controllers/itemController.js) to match item scehma _or simply delete querying logic._
 4. Open the project with your favourite IDE and install dependencies: `npm install`
 5. Create a __.env__ file in the project folder with the following:
     - MongoDB server credentials: `MONGODB_URI = mongodb+srv://<username>:<password>@<cluster_name>.mongodb.net/<database_name>`
@@ -17,7 +17,7 @@ Go to the directory where you want to store this repository, then:
 
     _Replace values between __<>__ with your actual values._
 
-6. Reset/Populate the database with default tasks: `node scripts/resetDB.js`
+6. Reset/Populate the database with default items: `node scripts/resetDB.js`
 7. Start the project: `npm start`. This will use _nodemon_ for automatic updates and _morgan_ for logging during development.
 
 # Docs
@@ -25,41 +25,22 @@ Go to the directory where you want to store this repository, then:
 Only __admin__ users can `POST`, `PUT`, and `DELETE`, while all authenticated users (__regular__ and __admin__) can do `GET` requests.
 
 ## Structure
-Each task must be structured as a JSON object in the following format:
+Each item must be structured as a JSON object in the following format:
 ```
 {
     "name": "some name",
-    "dueDate": "YYYY-MM-DD",
-    "completed": false,
-    "priority": "Medium"
+    // other self defined key-value pairs
 }
 ```
 An "__id__" property will be automatically generated and appended to the object.
 
-## Rules for Task Properties
+## Rules for Item Properties
 1. __Required Property__:
     - The only required property in `POST`/`PUT` requests is the "__name__" property.
-2. __Default Values__:
-    - "__completed__": Defaults to __false__ if not specified.
-    - "__priority__": Defaults to "__Low__" if not specified.
-3. __Allowed Values__:
-    - "__priority__" must be one of the following:
-        - "__None__",
-        - "__Low__",
-        - "__Medium__",
-        - "__High__"
-4. __Due Date Constraints__:
-    - When submitting a task with a "__dueDate__", it must be a date __greater than the current date__. Tasks with past dates will not be accepted.
-5. __Priority Rules__:
-    - If a task's "__completed__" property is set to __true__, its "__priority__" will automatically be changed to "__None__".
 
-## Example Requests
+## Authentication
 
-Below are sample requests to interact with the backend API. These examples demonstrate how to perform __CRUD operations__ using the `/tasks` endpoint.
-
-### Authentication
-
-Before making any task-related requests, ensure you have a valid token. Use the `/auth/login` endpoint with valid credentials to get a token.
+Before making any item-related requests, ensure you have a valid token. Use the `/auth/login` endpoint with valid credentials to get a token.
 
 __Register a User__:
 ```
@@ -93,38 +74,48 @@ __Login Response Example__:
 ```
 _See [JWT Introduction](https://jwt.io/introduction) for how the token is generated._
 
-### Create a New Task
-To create a task, use a valid admin token in the `Authorization` header.
+
+## Example Requests
+
+Example requests for `/items` endpoints.
+
+### POST a New Item
+To create a item, use a valid admin token in the `Authorization` header.
 
 __Request__:
 ```
-POST http://localhost:3000/tasks
+POST http://localhost:3000/items
 Content-Type: application/json
 Authorization: Bearer <adminToken>
 
 {
-    "name": "highly important task",
-    "dueDate": "2024-12-31",
-    "priority": "High"
+    "name": "update schema",
+    // other key-pairs
 }
 ```
 
-### Read Tasks
-__Get All Tasks__:
+__Response__:
 ```
-GET http://localhost:3000/tasks
+HTTP/1.1 201
+
+message: "Item Added Successfully.",
+newItem: {
+    "id": [total items + 1],
+    "name": "update schema",
+    // other key-pairs
+}
+```
+
+### GET Items
+__Get All Items__:
+```
+GET http://localhost:3000/items
 Authorization: Bearer <token>
 ```
 
-__Get Tasks by Priority__:
+__Get Items by ID__:
 ```
-GET http://localhost:3000/tasks?priority=high
-Authorization: Bearer <token>
-```
-
-__Get Tasks by ID__:
-```
-GET http://localhost:3000/tasks/1
+GET http://localhost:3000/items/1
 Authorization: Bearer <token>
 ```
 
@@ -132,44 +123,19 @@ __Response__:
 ```
 {
     "id": 1,
-    "name": "highly important task",
-    "dueDate": "2024-12-31T00:00:00.000Z",
-    "completed": false,
-    "priority": "High"
+    "name": "update schema",
+    // other key-pairs
 }
 ```
 
-### Update a Task
+### PUT (update) an Item
 
-__Mark Task as Completed__:
+_Dependent on how you change item schema_.
 
-When a task is marked as __completed__, its priority is automatically updated to "__None__":
-```
-PUT http://localhost:3000/tasks/1
-Content-Type: application/json
-Authorization: Bearer <adminToken>
-
-{
-    "name": "highly important task (done)",
-    "completed": true
-}
-```
-
-__Response__:
-```
-{
-    "id": 1,
-    "name": "highly important task (done)",
-    "dueDate": "2024-12-31T00:00:00.000Z",
-    "completed": true,
-    "priority": "None"
-}
-```
-
-### Delete Task
+### DELETE Item
 __Delete by ID__:
 ```
-DELETE http://localhost:3000/tasks/1
+DELETE http://localhost:3000/items/1
 Authorization: Bearer <adminToken>
 ```
 
